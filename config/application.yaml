@@ -106,7 +106,7 @@ bot:
     # 💡 TIP: Delete the profiles you don't need!
     #    Only keep the ones matching your TradingView alerts.
     #
-    # 💡 TIP: You can use the SAME API key for all profiles if you want
+    # 💡 TIP: You can use the same UID for all profiles if you want
     #    all trades on one Bitunix account.
     #
     # 💡 TIP: You can use DIFFERENT API keys for different profiles

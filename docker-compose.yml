@@ -1,0 +1,17 @@
+services:
+  trading-bot:
+    image: ghcr.io/cryptosauceyt/quantumai:latest
+    container_name: trading-bot
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config:/app/config:ro   # Your configuration
+      - ./data:/app/data          # Persistent data (pivots, state)
+    environment:
+      - TZ=UTC
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/api/v1/manage/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

@@ -1,0 +1,122 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    io.sauce.tradingbot: INFO
+    root: INFO
+
+bot:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # IMPORTANT: This bot only works with Bitunix accounts affiliated with
+  # Underground Trading. Register here:
+  # 👉 https://www.bitunix.site/register?vipCode=g3gj7090
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  # Trading pairs: leave empty, the bot auto-detects via TradingView webhooks
+  trading-pairs: []
+
+  # Data persistence (survives reboots)
+  state:
+    enabled: true
+    auto-save-interval: 30
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # PROFILES - Configure your strategies here
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 
+  # Each profile = 1 TradingView alert → 1 Bitunix account
+  # You can have multiple profiles for different coins or strategies
+  #
+  # ⚠️  REQUIRED fields for each profile:
+  #     - your-bitunix-uid (find it in Bitunix → Profile → Account Settings)
+  #     - api-key (create in Bitunix → API Management)
+  #     - api-secret (shown only once when creating API key)
+  #
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  profiles:
+    
+    # ─────────────────────────────────────────────────────────────────────────
+    # BITCOIN PROFILE
+    # ─────────────────────────────────────────────────────────────────────────
+    bitcoin:
+      your-bitunix-uid: REPLACE_WITH_YOUR_UID
+      leverage: 5
+      amount: all                    # "all" = full balance, or fixed: 100
+      secu-tp: 1.5                   # Safety TP % (if TradingView doesn't send)
+      secu-sl: 1.0                   # Safety SL %
+      entry-type: limit              # "limit" or "market"
+      api-key: REPLACE_WITH_YOUR_API_KEY
+      api-secret: REPLACE_WITH_YOUR_API_SECRET
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # ETHEREUM PROFILE
+    # ─────────────────────────────────────────────────────────────────────────
+    ethereum:
+      your-bitunix-uid: REPLACE_WITH_YOUR_UID
+      leverage: 6
+      amount: all
+      secu-tp: 2.0
+      secu-sl: 1.5
+      entry-type: limit
+      api-key: REPLACE_WITH_YOUR_API_KEY
+      api-secret: REPLACE_WITH_YOUR_API_SECRET
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # SOLANA PROFILE
+    # ─────────────────────────────────────────────────────────────────────────
+    solana:
+      your-bitunix-uid: REPLACE_WITH_YOUR_UID
+      leverage: 6
+      amount: all
+      secu-tp: 2.0
+      secu-sl: 1.5
+      entry-type: limit
+      api-key: REPLACE_WITH_YOUR_API_KEY
+      api-secret: REPLACE_WITH_YOUR_API_SECRET
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RIPPLE (XRP) PROFILE
+    # ─────────────────────────────────────────────────────────────────────────
+    ripple:
+      your-bitunix-uid: REPLACE_WITH_YOUR_UID
+      leverage: 8
+      amount: all
+      secu-tp: 2.5
+      secu-sl: 2.0
+      entry-type: limit
+      api-key: REPLACE_WITH_YOUR_API_KEY
+      api-secret: REPLACE_WITH_YOUR_API_SECRET
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # AVALANCHE (AVAX) PROFILE
+    # ─────────────────────────────────────────────────────────────────────────
+    avax:
+      your-bitunix-uid: REPLACE_WITH_YOUR_UID
+      leverage: 6
+      amount: all
+      secu-tp: 2.0
+      secu-sl: 1.5
+      entry-type: limit
+      api-key: REPLACE_WITH_YOUR_API_KEY
+      api-secret: REPLACE_WITH_YOUR_API_SECRET
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # 💡 TIP: Delete the profiles you don't need!
+    #    Only keep the ones matching your TradingView alerts.
+    #
+    # 💡 TIP: You can use the SAME API key for all profiles if you want
+    #    all trades on one Bitunix account.
+    #
+    # 💡 TIP: You can use DIFFERENT API keys for different profiles
+    #    if you want to split trades across multiple Bitunix accounts.
+    # ═══════════════════════════════════════════════════════════════════════
+
+  # Max age for webhooks (in seconds) - reject if older
+  expired-time: 120
+
+bitunix:
+  api-url: https://fapi.bitunix.com
+  ws-public-url: wss://fapi.bitunix.com/public/
+  ws-private-url: wss://fapi.bitunix.com/private/

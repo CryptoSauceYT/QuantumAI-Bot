@@ -1,0 +1,5 @@
+# Local data
+data/
+
+# Never commit secrets!
+# config/application.yaml  # Uncomment to exclude your config

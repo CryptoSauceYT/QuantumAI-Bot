@@ -2,17 +2,24 @@
 
 Automated trading bot for Bitunix - **Exclusively for Underground Trading members**.
 
+## 🖥️ Compatibility
+
+**Works on all Linux distributions:**
+- ✅ Ubuntu 18.04, 20.04, 22.04, 24.04 LTS
+- ✅ Ubuntu 25.04, 25.10 and all future versions
+- ✅ Debian 9, 10, 11, 12 and future versions
+- ✅ Any Linux with Docker installed
+
 ## ⚠️ Requirements
 
 1. A Bitunix account **affiliated with Underground Trading**
    👉 [Register here](https://www.bitunix.site/register?vipCode=g3gj7090)
 2. At least **1 Futures trade** completed on Bitunix
-3. A Linux VPS (Ubuntu 22.04 recommended)
+3. A Linux VPS (Ubuntu 22.04+ recommended)
 
 ---
 
 ## 🚀 Quick Installation
-
 ```bash
 # 1. Download the bot
 git clone https://github.com/CryptoSauceYT/QuantumAI-Bot.git
@@ -39,7 +46,6 @@ Edit `config/application.yaml` and replace:
 | `api-secret` | Displayed only once when creating the API |
 
 ### Example profile
-
 ```yaml
 profiles:
   solana:
@@ -57,12 +63,14 @@ profiles:
 
 ## 📋 Useful Commands
 
+Use `docker compose` (modern) or `docker-compose` (legacy) - both work!
+
 | Action | Command |
 |--------|---------|
 | View logs | `docker compose logs -f` |
 | Restart | `docker compose restart` |
 | Stop | `docker compose down` |
-| Update | `docker compose pull && docker compose up -d` |
+| Update | `./install.sh` |
 | Status | `docker compose ps` |
 
 ---
@@ -70,11 +78,9 @@ profiles:
 ## 🔄 Updating
 
 When a new version is available:
-
 ```bash
 cd ~/QuantumAI-Bot
-docker compose pull
-docker compose up -d
+./install.sh
 ```
 
 ---

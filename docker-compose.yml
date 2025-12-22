@@ -13,7 +13,7 @@ services:
       - TZ=UTC
     entrypoint: /bin/sh -c 'if [ ! -f /etc/nginx/ssl/nginx.crt ]; then apk add --no-cache openssl && SERVER_IP=$$(wget -qO- ifconfig.me 2>/dev/null || echo localhost) && openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt -subj "/CN=$$SERVER_IP" 2>/dev/null && echo "SSL cert generated for $$SERVER_IP"; fi && nginx -g "daemon off;"'
     depends_on:
-      - tradingbot
+      - trading-bot
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -21,8 +21,8 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  tradingbot:
-    build: .
+  trading-bot:
+    image: ghcr.io/cryptosauceyt/quantumai:latest
     container_name: trading-bot
     expose:
       - "8080"
@@ -31,6 +31,11 @@ services:
       - ./data:/app/data
     environment:
       - TZ=UTC
+      - JAVA_OPTS=-Xmx512m -Xms256m
+    deploy:
+      resources:
+        limits:
+          memory: 768M
     restart: unless-stopped
     logging:
       driver: "json-file"

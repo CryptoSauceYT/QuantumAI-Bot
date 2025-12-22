@@ -1,17 +1,47 @@
 services:
-  trading-bot:
-    image: ghcr.io/cryptosauceyt/quantumai:latest
-    container_name: trading-bot
+  # 🔒 Nginx reverse proxy with auto-generated SSL certificate
+  nginx:
+    image: nginx:alpine
+    container_name: trading-nginx
     ports:
-      - "8080:8080"
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ssl-certs:/etc/nginx/ssl
+    environment:
+      - TZ=UTC
+    entrypoint: /bin/sh -c 'if [ ! -f /etc/nginx/ssl/nginx.crt ]; then apk add --no-cache openssl && SERVER_IP=$$(wget -qO- ifconfig.me 2>/dev/null || echo localhost) && openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt -subj "/CN=$$SERVER_IP" 2>/dev/null && echo "SSL cert generated for $$SERVER_IP"; fi && nginx -g "daemon off;"'
+    depends_on:
+      - tradingbot
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  tradingbot:
+    build: .
+    container_name: trading-bot
+    expose:
+      - "8080"
     volumes:
       - ./config:/app/config:ro
       - ./data:/app/data
     environment:
       - TZ=UTC
-      - JAVA_OPTS=-Xmx512m -Xms256m
-    deploy:
-      resources:
-        limits:
-          memory: 768M
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/api/v1/manage/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  ssl-certs:

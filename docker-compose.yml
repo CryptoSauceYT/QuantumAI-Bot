@@ -8,18 +8,28 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ssl-certs:/etc/nginx/ssl
+      - ./ssl:/etc/nginx/ssl:ro
     environment:
       - TZ=UTC
-    entrypoint: /bin/sh -c 'if [ ! -f /etc/nginx/ssl/nginx.crt ]; then apk add --no-cache openssl && SERVER_IP=$$(wget -qO- ifconfig.me 2>/dev/null || echo localhost) && openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt -subj "/CN=$$SERVER_IP" 2>/dev/null && echo "SSL cert generated for $$SERVER_IP"; fi && nginx -g "daemon off;"'
     depends_on:
-      - trading-bot
+      ssl-init:
+        condition: service_completed_successfully
+      trading-bot:
+        condition: service_started
     restart: unless-stopped
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
+
+  # 🔐 One-time SSL certificate generator
+  ssl-init:
+    image: alpine:latest
+    container_name: ssl-init
+    volumes:
+      - ./ssl:/ssl
+    entrypoint: /bin/sh -c 'if [ ! -f /ssl/nginx.crt ]; then apk add --no-cache openssl curl && SERVER_IP=$$(curl -4 -s --connect-timeout 5 ifconfig.me || curl -4 -s --connect-timeout 5 icanhazip.com || curl -4 -s --connect-timeout 5 api.ipify.org || hostname -i | awk "{print \$$1}") && echo "Generating SSL for $$SERVER_IP" && openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /ssl/nginx.key -out /ssl/nginx.crt -subj "/CN=$$SERVER_IP" && chmod 644 /ssl/nginx.crt && chmod 600 /ssl/nginx.key && echo "SSL certificate created successfully"; else echo "SSL certificate already exists"; fi'
 
   trading-bot:
     image: ghcr.io/cryptosauceyt/quantumai:latest
@@ -47,6 +57,3 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-
-volumes:
-  ssl-certs:

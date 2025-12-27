@@ -3,7 +3,7 @@
 # ═══════════════════════════════════════════════════════════════════════════
 # 🤖 QuantumAI Trading Bot - Installation
 # Compatible: Ubuntu 18.04+, Debian 9+, all future versions
-# Includes: Nginx reverse proxy with SSL
+# Includes: Nginx reverse proxy with SSL + Firewall (anti-scanner)
 # ═══════════════════════════════════════════════════════════════════════════
 
 set -e
@@ -141,6 +141,40 @@ EOF
     fi
 }
 
+# ═══════════════════════════════════════════════════════════════════════════
+# FIREWALL SETUP (UFW)
+# Blocks direct access to port 8080 from Internet
+# Only Nginx (443) can reach the bot internally
+# ═══════════════════════════════════════════════════════════════════════════
+setup_firewall() {
+    echo -e "${BLUE}🛡️  Configuring firewall (UFW)...${NC}"
+    
+    # Install UFW if not present
+    if ! command -v ufw >/dev/null 2>&1; then
+        apt-get install -y ufw >/dev/null 2>&1
+    fi
+    
+    # Configure rules (non-interactive)
+    ufw --force reset >/dev/null 2>&1
+    
+    # Allow essential ports
+    ufw allow 22/tcp >/dev/null 2>&1    # SSH - CRITICAL
+    ufw allow 80/tcp >/dev/null 2>&1    # HTTP (redirect to HTTPS)
+    ufw allow 443/tcp >/dev/null 2>&1   # HTTPS (Nginx)
+    
+    # Block 8080 from outside (bot only accessible internally)
+    ufw deny 8080/tcp >/dev/null 2>&1
+    
+    # Enable firewall (non-interactive)
+    ufw --force enable >/dev/null 2>&1
+    
+    echo -e "${GREEN}✅ Firewall configured${NC}"
+    echo "      ├── Port 22 (SSH): ✅ Open"
+    echo "      ├── Port 80 (HTTP): ✅ Open → redirects to 443"
+    echo "      ├── Port 443 (HTTPS): ✅ Open"
+    echo "      └── Port 8080 (Bot): 🔒 Blocked from Internet"
+}
+
 # Check configuration
 if grep -q "REPLACE_WITH" config/application.yaml; then
     echo ""
@@ -161,11 +195,12 @@ if grep -q "REPLACE_WITH" config/application.yaml; then
     exit 0
 fi
 
-# Setup Nginx with SSL (run as root)
+# Setup Nginx with SSL + Firewall (run as root)
 if [ "$EUID" -eq 0 ]; then
     setup_nginx_ssl
+    setup_firewall
 else
-    echo -e "${YELLOW}⚠️  Run as root (sudo ./install.sh) to setup HTTPS automatically${NC}"
+    echo -e "${YELLOW}⚠️  Run as root (sudo ./install.sh) to setup HTTPS and firewall automatically${NC}"
 fi
 
 # Download latest image
@@ -190,6 +225,7 @@ if docker_compose ps 2>/dev/null | grep -q "running\|Up"; then
     echo -e "${GREEN}╚══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "🔗 Webhook URL: ${BLUE}https://$SERVER_IP/api/v1/place_limit_order${NC}"
+    echo -e "🛡️  Firewall: Port 8080 blocked (anti-scanner)"
     echo ""
     echo "📋 Useful commands:"
     echo "   View logs:    docker compose logs -f  OR  docker-compose logs -f"
